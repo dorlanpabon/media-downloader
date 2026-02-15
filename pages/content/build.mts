@@ -8,7 +8,7 @@ const rootDir = resolve(import.meta.dirname);
 const srcDir = resolve(rootDir, 'src');
 const matchesDir = resolve(srcDir, 'matches');
 
-const configs = Object.entries(getContentScriptEntries(matchesDir)).map(([name, entry]) =>
+const configs = Object.entries(getContentScriptEntries(matchesDir)).map(([name, entry], index) =>
   withPageConfig({
     mode: IS_DEV ? 'development' : undefined,
     resolve: {
@@ -16,7 +16,7 @@ const configs = Object.entries(getContentScriptEntries(matchesDir)).map(([name, 
         '@src': srcDir,
       },
     },
-    publicDir: resolve(rootDir, 'public'),
+    publicDir: index === 0 ? resolve(rootDir, 'public') : false, // Only copy public files once
     plugins: [IS_DEV && makeEntryPointPlugin()],
     build: {
       lib: {
@@ -26,14 +26,14 @@ const configs = Object.entries(getContentScriptEntries(matchesDir)).map(([name, 
         fileName: name,
       },
       outDir: resolve(rootDir, '..', '..', 'dist', 'content'),
+      emptyOutDir: false, // Never empty the output directory
     },
   }),
 );
 
-const builds = configs.map(async config => {
+// Build sequentially to avoid race conditions
+for (const config of configs) {
   //@ts-expect-error This is hidden property into vite's resolveConfig()
   config.configFile = false;
   await build(config);
-});
-
-await Promise.all(builds);
+}

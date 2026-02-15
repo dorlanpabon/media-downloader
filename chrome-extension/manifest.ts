@@ -31,7 +31,7 @@ const manifest = {
   version: packageJson.version,
   description: '__MSG_extensionDescription__',
   host_permissions: ['<all_urls>'],
-  permissions: ['storage', 'scripting', 'tabs', 'notifications', 'sidePanel'],
+  permissions: ['storage', 'scripting', 'tabs', 'notifications', 'sidePanel', 'downloads', 'activeTab'],
   options_page: 'options/index.html',
   background: {
     service_worker: 'background.js',
@@ -57,6 +57,21 @@ const manifest = {
       js: ['content/example.iife.js'],
     },
     {
+      matches: ['https://www.instagram.com/*', 'https://instagram.com/*'],
+      js: ['content/instagram.iife.js'],
+      run_at: 'document_start',
+    },
+    {
+      matches: ['https://www.tiktok.com/*', 'https://tiktok.com/*'],
+      js: ['content/tiktok.iife.js'],
+      run_at: 'document_start',
+    },
+    {
+      matches: ['https://www.facebook.com/*', 'https://facebook.com/*', 'https://fb.com/*'],
+      js: ['content/facebook.iife.js'],
+      run_at: 'document_start',
+    },
+    {
       matches: ['http://*/*', 'https://*/*', '<all_urls>'],
       js: ['content-ui/all.iife.js'],
     },
@@ -72,7 +87,7 @@ const manifest = {
   devtools_page: 'devtools/index.html',
   web_accessible_resources: [
     {
-      resources: ['*.js', '*.css', '*.svg', 'icon-128.png', 'icon-34.png'],
+      resources: ['*.js', '*.css', '*.svg', 'icon-128.png', 'icon-34.png', 'injected-main-world.js'],
       matches: ['*://*/*'],
     },
   ],

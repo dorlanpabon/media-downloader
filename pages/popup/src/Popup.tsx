@@ -5,6 +5,13 @@ import { exampleThemeStorage } from '@extension/storage';
 import { cn, ErrorDisplay, LoadingSpinner, ToggleButton } from '@extension/ui';
 import { useEffect, useState } from 'react';
 
+interface MediaChunk {
+  url: string;
+  sequenceNumber?: number;
+  data?: ArrayBuffer;
+  timestamp: number;
+}
+
 interface MediaItem {
   id: string;
   platform: string;
@@ -15,6 +22,11 @@ interface MediaItem {
   pageTitle: string;
   timestamp: number;
   size?: number;
+  isChunked?: boolean;
+  chunks?: MediaChunk[];
+  baseUrl?: string;
+  totalChunks?: number;
+  playlistUrl?: string;
 }
 
 const Popup = () => {
@@ -50,6 +62,17 @@ const Popup = () => {
       });
     } catch (err) {
       console.error('Error downloading media:', err);
+    }
+  };
+
+  const handleMergeChunks = async (mediaId: string) => {
+    try {
+      await chrome.runtime.sendMessage({
+        type: 'MERGE_CHUNKS',
+        mediaId,
+      });
+    } catch (err) {
+      console.error('Error merging chunks:', err);
     }
   };
 
@@ -136,31 +159,51 @@ const Popup = () => {
                       </p>
                       <p className="mt-1 text-xs opacity-75">
                         {media.contentType || 'Unknown type'} • {formatSize(media.size)}
+                        {media.isChunked && media.chunks && (
+                          <span className="ml-2 rounded bg-yellow-200 px-1.5 py-0.5 text-xs font-semibold text-yellow-800">
+                            {media.chunks.length} chunks
+                          </span>
+                        )}
                       </p>
                     </div>
                   </div>
 
                   <div className="mt-2 flex gap-2">
-                    <button
-                      onClick={() => handleDownload(media.id, false)}
-                      className={cn(
-                        'flex-1 rounded px-3 py-1.5 text-sm font-medium transition-transform hover:scale-105',
-                        isLight
-                          ? 'bg-blue-500 text-white hover:bg-blue-600'
-                          : 'bg-blue-600 text-white hover:bg-blue-700',
-                      )}>
-                      Download Video
-                    </button>
-                    <button
-                      onClick={() => handleDownload(media.id, true)}
-                      className={cn(
-                        'flex-1 rounded px-3 py-1.5 text-sm font-medium transition-transform hover:scale-105',
-                        isLight
-                          ? 'bg-green-500 text-white hover:bg-green-600'
-                          : 'bg-green-600 text-white hover:bg-green-700',
-                      )}>
-                      Download Audio
-                    </button>
+                    {media.isChunked && media.chunks && media.chunks.length > 0 ? (
+                      <button
+                        onClick={() => handleMergeChunks(media.id)}
+                        className={cn(
+                          'flex-1 rounded px-3 py-1.5 text-sm font-medium transition-transform hover:scale-105',
+                          isLight
+                            ? 'bg-purple-500 text-white hover:bg-purple-600'
+                            : 'bg-purple-600 text-white hover:bg-purple-700',
+                        )}>
+                        Merge & Download ({media.chunks.length} chunks)
+                      </button>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => handleDownload(media.id, false)}
+                          className={cn(
+                            'flex-1 rounded px-3 py-1.5 text-sm font-medium transition-transform hover:scale-105',
+                            isLight
+                              ? 'bg-blue-500 text-white hover:bg-blue-600'
+                              : 'bg-blue-600 text-white hover:bg-blue-700',
+                          )}>
+                          Download Video
+                        </button>
+                        <button
+                          onClick={() => handleDownload(media.id, true)}
+                          className={cn(
+                            'flex-1 rounded px-3 py-1.5 text-sm font-medium transition-transform hover:scale-105',
+                            isLight
+                              ? 'bg-green-500 text-white hover:bg-green-600'
+                              : 'bg-green-600 text-white hover:bg-green-700',
+                          )}>
+                          Download Audio
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               ))}

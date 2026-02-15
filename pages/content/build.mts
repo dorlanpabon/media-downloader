@@ -16,7 +16,7 @@ const configs = Object.entries(getContentScriptEntries(matchesDir)).map(([name, 
         '@src': srcDir,
       },
     },
-    publicDir: index === 0 ? resolve(rootDir, 'public') : false, // Only copy public files once
+    publicDir: index === 0 ? resolve(rootDir, 'public') : false, // Only copy public files once to avoid overwriting
     plugins: [IS_DEV && makeEntryPointPlugin()],
     build: {
       lib: {
@@ -26,7 +26,7 @@ const configs = Object.entries(getContentScriptEntries(matchesDir)).map(([name, 
         fileName: name,
       },
       outDir: resolve(rootDir, '..', '..', 'dist', 'content'),
-      emptyOutDir: false, // Never empty the output directory
+      emptyOutDir: false, // Prevent emptying to avoid race conditions with parallel builds
     },
   }),
 );

@@ -6,6 +6,7 @@ A Chrome extension that allows you to download videos and audio from Instagram, 
 
 - 🎥 **Video Detection**: Automatically detects videos from Instagram, TikTok, and Facebook
 - 📥 **Easy Downloads**: Download videos or extract audio with one click
+- 🧩 **Chunk Merging**: Automatically detects and merges HLS/DASH streaming video segments
 - 🎨 **Clean UI**: Modern popup interface with platform badges and media details
 - ⚡ **Real-time**: Detects media as you browse, updates every 2 seconds
 - 🔒 **Secure**: Passes all security checks, no data is sent to external servers
@@ -29,7 +30,19 @@ A Chrome extension that allows you to download videos and audio from Instagram, 
 1. **Visit Supported Sites**: Go to Instagram, TikTok, or Facebook
 2. **Browse Content**: Videos will be automatically detected as they load
 3. **Open Extension**: Click the extension icon in the toolbar
-4. **Download**: Choose "Download Video" or "Download Audio" for any detected media
+4. **Download**: 
+   - For regular videos: Choose "Download Video" or "Download Audio"
+   - For streaming videos (chunks): Wait for all chunks to load, then click "Merge & Download"
+
+### Chunked Videos (HLS/DASH Streams)
+
+Many streaming services split videos into small chunks. The extension automatically:
+- Detects video chunks (.ts, .m4s files)
+- Groups them by video
+- Shows chunk count with a yellow badge
+- Provides a "Merge & Download" button to combine all chunks into a single file
+
+**See [CHUNK_MERGING.md](CHUNK_MERGING.md) for detailed information about the chunk merging feature.**
 
 ## How It Works
 
